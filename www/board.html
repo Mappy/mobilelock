@@ -3,11 +3,11 @@
     <head>
         <title>Mobile Lock</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="stylesheet" media="all" type="text/css" href="components/bootstrap/dist/css/bootstrap.min.css" />
         <style>
-            body                        { margin: 0; }
+            body                        { margin: 0; font-family: sans-serif; }
             h1                          { color: white; background-color: black; text-align: center; margin: 0; padding: 0.3em; }
             section                     { margin: .5em; }
+            small                       { display: block; color: #666; }
         </style>
     </head>
     <body>
@@ -22,7 +22,7 @@
     </body>
     <script type="text/template" id="tpl-devices">
             <% _.each(devices, function(device) { %>
-                <li><strong><%= device.who %></strong> : <%= device.ua %></li>
+            <li><strong><%= device.who %></strong> : <%= device.name %> <small>(<%= device.ua %>)</small></li>
             <% }); %>
     </script>
     <script src="components/underscore/underscore.js"></script>

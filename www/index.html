@@ -3,13 +3,13 @@
     <head>
         <title>Mobile Lock</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="stylesheet" media="all" type="text/css" href="components/bootstrap/dist/css/bootstrap.min.css" />
         <style>
-            body            { margin: 0; }
+            body            { margin: 0; font-family: sans-serif; font-size: 24px; }
+            a               { text-decoration: none; }
             h1              { color: white; background-color: black; text-align: center; margin: 0; padding: 0.3em; }
             section         { font-size: 28px; }
             div             { width: 280px; margin: 2em auto auto auto; text-align: center; }
-            input           { display: block; width: 280px; text-align: center; margin-bottom: 2em; }
+            input           { display: block; font-size: 24px; width: 280px; text-align: center; margin-bottom: 2em; }
             .busy           { background-color: #D95366; }
             .free           { background-color: #7ED282; }
             .free .unlock   { display: none; }
@@ -47,8 +47,8 @@
                         alert('Veuillez saisir un trigramme');
                     } else {
                         localStorage.who = who;
-                        localStorage.key = +new Date() + "-" + Math.random();
-                        $.post('/api/lock', { 'who': localStorage.who, 'key': localStorage.key }, function(data, textStatus, xhr) {
+                        localStorage.localKey = +new Date() + "-" + Math.random();
+                        $.post('/api/lock', { 'who': localStorage.who, 'key': localStorage.localKey }, function(data, textStatus, xhr) {
                             changeLock();
                             localStorage.lock = true;
                         }).error(function(xhr, textStatus, error) {
@@ -58,7 +58,7 @@
                 });
                 $('.unlock a').click(function(e) {
                     e.preventDefault();
-                    $.post('/api/unlock', { 'who': localStorage.who, 'key': localStorage.key }, function(data, textStatus, xhr) {
+                    $.post('/api/unlock', { 'who': localStorage.who, 'key': localStorage.localKey }, function(data, textStatus, xhr) {
                         changeLock();
                         localStorage.lock = false;
                     }).error(function(xhr, textStatus, error) {
