@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Mobile Lock</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" media="all" type="text/css" href="components/bootstrap/dist/css/bootstrap.min.css" />
+        <style>
+            body                        { margin: 0; }
+            h1                          { color: white; background-color: black; text-align: center; margin: 0; padding: 0.3em; }
+            section                     { margin: .5em; }
+        </style>
+    </head>
+    <body>
+        <h1>Mobile Lock</h1>
+        <section id="add">
+        </section>
+        <section id="devices">
+        <h2>Mobiles en cours d’utilisation :</h2>
+        <ul>
+        </ul>
+        </section>
+    </body>
+    <script type="text/template" id="tpl-devices">
+            <% _.each(devices, function(device) { %>
+                <li><%= device.ua %></li>
+            <% }); %>
+    </script>
+    <script src="components/underscore/underscore.js"></script>
+    <script src="components/jquery/jquery.js"></script>
+    <script>
+        var MobileLock = (function(undefined) {
+
+            var $devices = $('#devices ul');
+            var tplDevices = _.template($('#tpl-devices').text());
+
+            var launch = function() {
+                $.get('/api/devices', function(devices) {
+                    $devices.html(tplDevices(devices));
+                });
+            }
+            $(launch);
+        })();
+    </script>
+</html>

@@ -4,24 +4,60 @@
         <title>Mobile Lock</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="stylesheet" media="all" type="text/css" href="components/bootstrap/dist/css/bootstrap.min.css" />
-        <link rel="stylesheet" media="all" type="text/css" href="mobilelock.css" />
+        <style>
+            body            { margin: 0; }
+            h1              { color: white; background-color: black; text-align: center; margin: 0; padding: 0.3em; }
+            section         { font-size: 28px; }
+            div             { width: 280px; margin: 2em auto auto auto; text-align: center; }
+            a,a.visited,a.hover,a.active { color: white; }
+            input           { display: block; width: 280px; text-align: center; }
+            .busy           { background-color: #D95366; }
+            .free           { background-color: #7ED282; }
+            .free .unlock     { display: none; }
+            .busy .lock   { display: none; }
+        </style>
     </head>
-    <body>
+    <body class="free">
         <h1>Mobile Lock</h1>
-        <section id="add">
-        </section>
-        <section id="devices">
-        <h2>Mobiles en cours d’utilisation :</h2>
-        <ul>
-        </ul>
+        <section>
+            <div class="lock">
+                <input type="text" placeholder="Votre trigramme">
+                <a href="">Lock</a>
+            </div>
+            <div class="unlock">
+                <a href="">Unlock</a>
+            </div>
         </section>
     </body>
-    <script type="text/template" id="tpl-devices">
-            <% _.each(devices, function(device) { %>
-                <li><%= device.ua %></li>
-            <% }); %>
-    </script>
     <script src="components/underscore/underscore.js"></script>
     <script src="components/jquery/jquery.js"></script>
-    <script src="mobilelock.js"></script>
+    <script>
+        var MobileLock = (function(undefined) {
+            $(function() {
+                var changeLock = function() {
+                    $('body').toggleClass('free').toggleClass('busy');
+                }
+                $('.lock a').click(function(e) {
+                    e.preventDefault();
+                    var who = $('input').val();
+                    if (who.length === 0) {
+                        alert('Veuillez saisir un trigramme');
+                    } else {
+                        $.ajax({
+                            type: "POST",
+                            url: '/api/lock',
+                            data: { 'who': who, 'ua': navigator.userAgent },
+                            dataType: 'json',
+                            success: function(data, textStatus, xhr) {
+                                changeLock();
+                            },
+                            error: function(xhr, textStatus, error) {
+                                alert('Une erreur est survenue : '+xhr.status);
+                            }
+                        });
+                    }
+                });
+            });
+        })();
+    </script>
 </html>
