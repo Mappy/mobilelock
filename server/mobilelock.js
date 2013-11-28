@@ -1,14 +1,8 @@
 var _ = require('underscore');
 
-var mobilelock = function(config, resultsFileName, persistedDevices) {
+var mobilelock = function(config, resultsFileName, persistedResults) {
 
-    var devices = persistedDevices || {};
-
-    devices = { 
-        "devices": [ 
-            { "ua": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:25.0) Gecko/20100101 Firefox/25.0"}
-        ]
-    };
+    var results = persistedResults.devices ? persistedResults : { "devices": [] };
     
     var launch = function() {
         var express = require('express');
@@ -18,6 +12,7 @@ var mobilelock = function(config, resultsFileName, persistedDevices) {
             app.use(express.compress());
             app.use(express.static( __dirname+'/../www'));
             app.use(express.logger());
+            app.use(express.bodyParser());
             app.use(app.router);
         });
         app.listen(config.server.port);
@@ -27,7 +22,20 @@ var mobilelock = function(config, resultsFileName, persistedDevices) {
         });
         app.get('/api/devices', function(req, res) {
             res.setHeader('content-type', 'application/json');
-            res.send(devices);
+            res.send(results);
+        });
+        app.post('/api/lock', function(req, res) {
+            var who = req.body.who;
+            var ua = req.get('User-Agent');
+            var status = 200;
+            if (!who || !ua) {
+                status = 418; // I’m a teapot... :-D
+            } else {
+                console.log(results);
+                console.log(results.devices);
+                results.devices.push({ 'who': who, 'ua': ua });
+            }
+            res.send(status);
         });
         console.log('MobileLock server listening on '+config.server.port);
     };

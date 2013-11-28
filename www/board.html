@@ -22,7 +22,7 @@
     </body>
     <script type="text/template" id="tpl-devices">
             <% _.each(devices, function(device) { %>
-                <li><%= device.ua %></li>
+                <li><strong><%= device.who %></strong> : <%= device.ua %></li>
             <% }); %>
     </script>
     <script src="components/underscore/underscore.js"></script>
