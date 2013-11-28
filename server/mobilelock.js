@@ -3,6 +3,15 @@ var _ = require('underscore');
 var mobilelock = function(config, resultsFileName, persistedResults) {
 
     var results = persistedResults || { "devices": [] };
+
+    var getPhoneName = function(ua) {
+        if (ua.indexOf("iPhone OS 6_1") >= 0) {
+            return "iPhone (iOs 6.1)";
+        } else if (ua.indexOf("Galaxy Nexus") >= 0) {
+            return "Galaxy Nexus (Android 4.3)";
+        }
+        return "Don’t know :-(";
+    };
     
     var launch = function() {
         var express = require('express');
@@ -30,7 +39,7 @@ var mobilelock = function(config, resultsFileName, persistedResults) {
             if (!ua || !req.body.key || !req.body.who) {
                 status = 418; // I’m a teapot... :-D
             } else {
-                results.devices.push({ 'key': req.body.key, 'who': req.body.who, 'ua': ua });
+                results.devices.push({ 'key': req.body.key, 'who': req.body.who, 'ua': ua, 'name': getPhoneName(ua) });
             }
             res.send(status);
         });
