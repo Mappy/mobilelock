@@ -1,9 +1,14 @@
 var _ = require('underscore');
 
-var mobilelock = function(config, resultsFileName, persistedRresults) {
+var mobilelock = function(config, resultsFileName, persistedDevices) {
 
-    var results = persistedRresults || {};
+    var devices = persistedDevices || {};
 
+    devices = { 
+        "devices": [ 
+            { "ua": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:25.0) Gecko/20100101 Firefox/25.0"}
+        ]
+    };
     
     var launch = function() {
         var express = require('express');
@@ -20,8 +25,11 @@ var mobilelock = function(config, resultsFileName, persistedRresults) {
             res.setHeader('content-type', 'application/json');
             res.send(_.omit(config, 'server'));
         });
-
-        console.log('Monitor server listening on '+config.server.port);
+        app.get('/api/devices', function(req, res) {
+            res.setHeader('content-type', 'application/json');
+            res.send(devices);
+        });
+        console.log('MobileLock server listening on '+config.server.port);
     };
 
     var saveAndQuit = function() {
