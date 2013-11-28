@@ -10,7 +10,7 @@ fs.readFile(__dirname+'/config.json', 'utf8', function (err, data) {
 
     try {
         var config = JSON.parse(data);
-        var results = {};
+        var results = undefined;
 
         fs.readFile(RESULTS_FILENAME, 'utf8', function (err, data) {
             if (!err) { 
