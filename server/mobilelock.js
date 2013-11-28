@@ -2,17 +2,8 @@ var _ = require('underscore');
 
 var mobilelock = function(config, resultsFileName, persistedResults) {
 
-    var results = persistedResults || { "devices": [] };
+    var devices = persistedResults || {};
 
-    var getPhoneName = function(ua) {
-        if (ua.indexOf("iPhone OS 6_1") >= 0) {
-            return "iPhone (iOs 6.1)";
-        } else if (ua.indexOf("Galaxy Nexus") >= 0) {
-            return "Galaxy Nexus (Android 4.3)";
-        }
-        return "Don’t know :-(";
-    };
-    
     var launch = function() {
         var express = require('express');
         var app = express();
@@ -31,7 +22,21 @@ var mobilelock = function(config, resultsFileName, persistedResults) {
         });
         app.get('/api/devices', function(req, res) {
             res.setHeader('content-type', 'application/json');
-            res.send(results);
+            res.send(devices);
+        });
+        app.get('/api/isLocked', function(req, res) {
+            res.setHeader('content-type', 'application/json');
+            if (!req.query.key) {
+                res.send(418); // I’m a teapot... :-D
+            } else {
+                var device = devices[req.body.key];
+                if (device) {
+                    res.send(JSON.stringify(device));
+                } else {
+                    res.send(404);
+                }
+
+            }
         });
         app.post('/api/lock', function(req, res) {
             var ua = req.get('User-Agent');
@@ -39,7 +44,12 @@ var mobilelock = function(config, resultsFileName, persistedResults) {
             if (!ua || !req.body.key || !req.body.who) {
                 status = 418; // I’m a teapot... :-D
             } else {
-                results.devices.push({ 'key': req.body.key, 'who': req.body.who, 'ua': ua, 'name': getPhoneName(ua) });
+                var device = devices[req.body.key];
+                if (device) {
+                    device.free = false;
+                } else {
+                    devices[req.body.key] = { 'who': req.body.who, 'ua': ua, 'model': req.body.model, 'os': req.body.os, 'free': false };
+                }
             }
             res.send(status);
         });
@@ -48,9 +58,10 @@ var mobilelock = function(config, resultsFileName, persistedResults) {
             if (!req.body.key) {
                 status = 418; // I’m a teapot... :-D
             } else {
-                results.devices = _.reject(results.devices, function(device) {
-                    return device.key === req.body.key;
-                });
+                var device = devices[req.body.key];
+                if (device) {
+                    device.free = true;
+                }
             }
             res.send(status);
         });
@@ -59,7 +70,7 @@ var mobilelock = function(config, resultsFileName, persistedResults) {
 
     var saveAndQuit = function() {
         var fs = require('fs');
-        fs.writeFile(resultsFileName, JSON.stringify(results), function (err) {
+        fs.writeFile(resultsFileName, JSON.stringify(devices), function (err) {
             if (err) { 
                 console.log('Error while persisting results :', err);
             } else {

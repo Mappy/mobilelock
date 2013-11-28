@@ -4,38 +4,101 @@
         <title>Mobile Lock</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <style>
-            body                        { margin: 0; font-family: sans-serif; }
-            h1                          { color: white; background-color: black; text-align: center; margin: 0; padding: 0.3em; }
-            section                     { margin: .5em; }
-            small                       { display: block; color: #666; }
+            /* http://meyerweb.com/eric/tools/css/reset/ 
+            v2.0 | 20110126
+            License: none (public domain)
+            */
+            html, body, div, span, applet, object, iframe,
+            h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+            a, abbr, acronym, address, big, cite, code,
+            del, dfn, em, img, ins, kbd, q, s, samp,
+            small, strike, strong, sub, sup, tt, var,
+            b, u, i, center,
+            dl, dt, dd, ol, ul, li,
+            fieldset, form, label, legend,
+            table, caption, tbody, tfoot, thead, tr, th, td,
+            article, aside, canvas, details, embed, 
+            figure, figcaption, footer, header, hgroup, 
+            menu, nav, output, ruby, section, summary,
+            time, mark, audio, video {
+                margin: 0;
+                padding: 0;
+                border: 0;
+                font-size: 100%;
+                font: inherit;
+                vertical-align: baseline;
+            }
+            /* HTML5 display-role reset for older browsers */
+            article, aside, details, figcaption, figure, 
+            footer, header, hgroup, menu, nav, section {
+                display: block;
+            }
+            body {
+                line-height: 1;
+            }
+            ol, ul {
+                list-style: none;
+            }
+            blockquote, q {
+                quotes: none;
+            }
+            blockquote:before, blockquote:after,
+            q:before, q:after {
+                content: '';
+                content: none;
+            }
+            table {
+                border-collapse: collapse;
+                border-spacing: 0;
+            }
+            /* Custom styles */
+            body     { margin: 0; font-family: sans-serif; }
+            h1       { color: white; background-color: black; text-align: center; margin: 0; padding: 0.3em; font-size: 36px; }
+            section  { margin: .5em; font-size: 16px; }
+            ul       { margin: .5em 1.5em; }
+            li       { list-style-type: square; }
+            small    { display: block; color: #666; font-size: 12px; }
         </style>
     </head>
     <body>
         <h1>Mobile Lock</h1>
         <section id="add">
         </section>
-        <section id="devices">
+        <section id="busydevices">
         <h2>Mobiles en cours d’utilisation :</h2>
+        <ul>
+        </ul>
+        </section>
+        <section id="freedevices">
+        <h2>Mobiles libres :</h2>
         <ul>
         </ul>
         </section>
     </body>
     <script type="text/template" id="tpl-devices">
-            <% _.each(devices, function(device) { %>
-            <li><strong><%= device.who %></strong> : <%= device.name %> <small>(<%= device.ua %>)</small></li>
-            <% }); %>
+            <% for (var i in devices) { %>
+            <li><strong><%= devices[i].who %></strong> : <%= devices[i].model %> <%= devices[i].os %> <small>(<%= devices[i].ua %>)</small></li>
+            <% }; %>
     </script>
     <script src="components/underscore/underscore.js"></script>
     <script src="components/jquery/jquery.js"></script>
     <script>
         var MobileLock = (function(undefined) {
 
-            var $devices = $('#devices ul');
+            var $busydevices = $('#busydevices ul');
+            var $freedevices = $('#freedevices ul');
             var tplDevices = _.template($('#tpl-devices').text());
 
             var launch = function() {
                 $.get('/api/devices', function(devices) {
-                    $devices.html(tplDevices(devices));
+                    var busydevs = _.filter(devices, function(dev) {
+                        return dev.free === false;
+                    });
+                    var freedevs = _.filter(devices, function(dev) {
+                        return dev.free === true;
+                    });
+                    $busydevices.html(tplDevices({'devices':busydevs}));
+                    $freedevices.html(tplDevices({'devices':freedevs}));
                 });
             }
             $(launch);
