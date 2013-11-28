@@ -8,12 +8,18 @@
     </head>
     <body>
         <h1>Mobile Lock</h1>
-    </body>
-    <script type="text/template" id="tpl-target">
-        <section id="<%= name %>">
-            <h2><a href="<%= url %>"><%= name %></a></h2>
-            <p class="timetable"></p>
+        <section id="add">
         </section>
+        <section id="devices">
+        <h2>Mobiles en cours d’utilisation :</h2>
+        <ul>
+        </ul>
+        </section>
+    </body>
+    <script type="text/template" id="tpl-devices">
+            <% _.each(devices, function(device) { %>
+                <li><%= device.ua %></li>
+            <% }); %>
     </script>
     <script src="components/underscore/underscore.js"></script>
     <script src="components/jquery/jquery.js"></script>
