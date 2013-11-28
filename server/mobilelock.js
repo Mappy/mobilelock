@@ -2,7 +2,7 @@ var _ = require('underscore');
 
 var mobilelock = function(config, resultsFileName, persistedResults) {
 
-    var results = persistedResults.devices ? persistedResults : { "devices": [] };
+    var results = persistedResults || { "devices": [] };
     
     var launch = function() {
         var express = require('express');
@@ -25,15 +25,23 @@ var mobilelock = function(config, resultsFileName, persistedResults) {
             res.send(results);
         });
         app.post('/api/lock', function(req, res) {
-            var who = req.body.who;
             var ua = req.get('User-Agent');
             var status = 200;
-            if (!who || !ua) {
+            if (!ua || !req.body.key || !req.body.who) {
                 status = 418; // I’m a teapot... :-D
             } else {
-                console.log(results);
-                console.log(results.devices);
-                results.devices.push({ 'who': who, 'ua': ua });
+                results.devices.push({ 'key': req.body.key, 'who': req.body.who, 'ua': ua });
+            }
+            res.send(status);
+        });
+        app.post('/api/unlock', function(req, res) {
+            var status = 200;
+            if (!req.body.key) {
+                status = 418; // I’m a teapot... :-D
+            } else {
+                results.devices = _.reject(results.devices, function(device) {
+                    return device.key === req.body.key;
+                });
             }
             res.send(status);
         });

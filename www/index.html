@@ -9,19 +9,19 @@
             h1              { color: white; background-color: black; text-align: center; margin: 0; padding: 0.3em; }
             section         { font-size: 28px; }
             div             { width: 280px; margin: 2em auto auto auto; text-align: center; }
-            a,a.visited,a.hover,a.active { color: white; }
-            input           { display: block; width: 280px; text-align: center; }
+            input           { display: block; width: 280px; text-align: center; margin-bottom: 2em; }
             .busy           { background-color: #D95366; }
             .free           { background-color: #7ED282; }
-            .free .unlock     { display: none; }
-            .busy .lock   { display: none; }
+            .free .unlock   { display: none; }
+            .busy .lock     { display: none; }
+            a               { padding: 8px; background-color: white; color: black; border: 4px solid white; border-radius: 8px; }
         </style>
     </head>
     <body class="free">
         <h1>Mobile Lock</h1>
         <section>
             <div class="lock">
-                <input type="text" placeholder="Votre trigramme">
+                <input type="text" class="upper" placeholder="Votre trigramme" autocomplete="off" />
                 <a href="">Lock</a>
             </div>
             <div class="unlock">
@@ -34,6 +34,9 @@
     <script>
         var MobileLock = (function(undefined) {
             $(function() {
+                if (localStorage.lock === "true") {
+                    $('body').removeClass('free').addClass('busy');
+                }
                 var changeLock = function() {
                     $('body').toggleClass('free').toggleClass('busy');
                 }
@@ -43,13 +46,27 @@
                     if (who.length === 0) {
                         alert('Veuillez saisir un trigramme');
                     } else {
-                        $.post('/api/lock', { 'who': who }, function(data, textStatus, xhr) {
+                        localStorage.who = who;
+                        localStorage.key = +new Date() + "-" + Math.random();
+                        $.post('/api/lock', { 'who': localStorage.who, 'key': localStorage.key }, function(data, textStatus, xhr) {
                             changeLock();
                             localStorage.lock = true;
                         }).error(function(xhr, textStatus, error) {
                             alert('Une erreur est survenue : '+xhr.status);
                         });
                     }
+                });
+                $('.unlock a').click(function(e) {
+                    e.preventDefault();
+                    $.post('/api/unlock', { 'who': localStorage.who, 'key': localStorage.key }, function(data, textStatus, xhr) {
+                        changeLock();
+                        localStorage.lock = false;
+                    }).error(function(xhr, textStatus, error) {
+                        alert('Une erreur est survenue : '+xhr.status);
+                    });
+                });
+                $('.upper').keyup(function() {
+                    this.value = this.value.toUpperCase();
                 });
             });
         })();
