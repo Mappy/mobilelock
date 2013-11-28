@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Mobile Lock</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" media="all" type="text/css" href="components/bootstrap/dist/css/bootstrap.min.css" />
+        <link rel="stylesheet" media="all" type="text/css" href="mobilelock.css" />
+    </head>
+    <body>
+        <h1>Mobile Lock</h1>
+    </body>
+    <script type="text/template" id="tpl-target">
+        <section id="<%= name %>">
+            <h2><a href="<%= url %>"><%= name %></a></h2>
+            <p class="timetable"></p>
+        </section>
+    </script>
+    <script src="components/underscore/underscore.js"></script>
+    <script src="components/jquery/jquery.js"></script>
+    <script src="mobilelock.js"></script>
+</html>

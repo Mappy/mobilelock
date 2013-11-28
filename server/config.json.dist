@@ -1,0 +1,5 @@
+{
+    "server": {                         // Server only configuration
+        "port": 8000,
+    }
+}
