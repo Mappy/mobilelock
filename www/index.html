@@ -137,6 +137,8 @@
                         }
                         $.post('/api/lock', { 'who': localStorage.who, 'key': localStorage.localKey, 'os': localStorage.os, 'model': localStorage.model }, function(data, textStatus, xhr) {
                             $('body').removeClass('free').addClass('busy');
+                            $('.model').hide();
+                            $('.os').hide();
                             localStorage.lock = true;
                         }).error(function(xhr, textStatus, error) {
                             alert('Une erreur est survenue : '+xhr.status);
