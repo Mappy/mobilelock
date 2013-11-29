@@ -58,6 +58,8 @@
             ul       { margin: .5em 1.5em; }
             li       { list-style-type: square; }
             small    { display: block; color: #666; font-size: 12px; }
+            strong   { font-weight: bold; }
+            #freedevices strong { display: none; }
         </style>
     </head>
     <body>
@@ -77,7 +79,7 @@
     </body>
     <script type="text/template" id="tpl-devices">
             <% for (var i in devices) { %>
-            <li><strong><%= devices[i].who %></strong> : <%= devices[i].model %> <%= devices[i].os %> <small>(<%= devices[i].ua %>)</small></li>
+            <li><strong><%= devices[i].who %></strong> <%= devices[i].model %> <%= devices[i].os %> <small>(<%= devices[i].ua %>)</small></li>
             <% }; %>
     </script>
     <script src="components/underscore/underscore.js"></script>

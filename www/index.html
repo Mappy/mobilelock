@@ -91,13 +91,18 @@
                 }
 
                 var initForm = function() {
-                    var ua = navigator.userAgent;
-                     var parser = new UAParser();
-                     parser.setUA(ua); 
-                     var device = parser.getDevice();
-                     var os = parser.getOS()
-                     $('.model').val(device.vendor+ " "+device.model);
-                     $('.os').val(os.name+" "+ os.version );
+                    if (localStorage.os && localStorage.model) {
+                        $('.model').hide();
+                        $('.os').hide();
+                    } else {
+                        var ua = navigator.userAgent;
+                        var parser = new UAParser();
+                        parser.setUA(ua); 
+                        var device = parser.getDevice();
+                        var os = parser.getOS()
+                        $('.model').val(device.vendor+ " "+device.model);
+                        $('.os').val(os.name+" "+ os.version );
+                    }
                 };
 
                 if (localStorage.localKey) {
@@ -119,8 +124,12 @@
                         alert('Veuillez saisir un trigramme');
                     } else {
                         localStorage.who = who.toUpperCase();
-                        localStorage.os = $('.os').val();
-                        localStorage.model = $('.model').val();
+                        if(!localStorage.os) {
+                            localStorage.os = $('.os').val();
+                        }
+                        if(!localStorage.model) {
+                            localStorage.model = $('.model').val();
+                        }
                         $.post('/api/lock', { 'who': localStorage.who, 'key': localStorage.localKey, 'os': localStorage.os, 'model': localStorage.model }, function(data, textStatus, xhr) {
                             $('body').removeClass('free').addClass('busy');
                             localStorage.lock = true;
