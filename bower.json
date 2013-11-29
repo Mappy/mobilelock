@@ -4,6 +4,7 @@
     "dependencies": {
         "underscore": "latest",
         "jquery": "latest",
-        "socket.io-client": "latest"
+        "socket.io-client": "latest",
+        "moment": "latest"
     }
 }
