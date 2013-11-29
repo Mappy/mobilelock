@@ -117,12 +117,13 @@
                 });
                 socket.on('update', function (data) {
                     console.log('device updated', data);
+                    $busydevices.find("[data-id='"+data.key+"']").remove();
+                    $freedevices.find("[data-id='"+data.key+"']").remove();
+                    var device = tplDevice({'device': data});
                     if (data.free) {
-                        $busydevices.find("[data-id='"+data.key+"']").remove();
-                        $freedevices.append(tplDevice({'device': data}));
+                        $freedevices.append(device);
                     } else {
-                        $freedevices.find("[data-id='"+data.key+"']").remove();
-                        $busydevices.append(tplDevice({'device': data}));
+                        $busydevices.append(device);
                     }
                 });
             }
