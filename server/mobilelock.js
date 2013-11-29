@@ -46,6 +46,7 @@ var mobilelock = function(config, resultsFileName, persistedResults) {
             } else {
                 var device = devices[req.body.key];
                 if (device) {
+                    device.who = req.body.who;
                     device.free = false;
                 } else {
                     devices[req.body.key] = { 'who': req.body.who, 'ua': ua, 'model': req.body.model, 'os': req.body.os, 'free': false };
