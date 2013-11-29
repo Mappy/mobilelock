@@ -10,6 +10,15 @@ var mobilelock = function(config, resultsFileName, persistedResults) {
         var server = require('http').createServer(app);
         var io = require('socket.io').listen(server);
 
+        var boards = []; // socket.io - boards
+        var clients = {}; // socket.io - clients / devices
+
+        var sendToBoards = function(t, msg) {
+            for(var i in boards) {
+                boards[i].emit(t, msg);
+            }
+        }
+
         app.configure(function() {
             app.use(express.compress());
             app.use(express.static( __dirname+'/../www'));
@@ -50,8 +59,11 @@ var mobilelock = function(config, resultsFileName, persistedResults) {
                 if (device) {
                     device.who = req.body.who;
                     device.free = false;
+                    sendToBoards('update', device);
                 } else {
-                    devices[req.body.key] = { 'who': req.body.who, 'ua': ua, 'model': req.body.model, 'os': req.body.os, 'free': false };
+                    var newDevice = { 'key': req.body.key, 'who': req.body.who, 'ua': ua, 'model': req.body.model, 'os': req.body.os, 'free': false };
+                    devices[req.body.key] = newDevice;
+                    sendToBoards('add', newDevice);
                 }
             }
             res.send(status);
@@ -64,14 +76,22 @@ var mobilelock = function(config, resultsFileName, persistedResults) {
                 var device = devices[req.body.key];
                 if (device) {
                     device.free = true;
+                    sendToBoards('update', device);
                 }
             }
             res.send(status);
         });
+
         io.sockets.on('connection', function (socket) {
-            socket.emit('news', { hello: 'world' });
-            socket.on('my other event', function (data) {
-                console.log(data);
+            socket.emit('hello', { 'hello': 'world' });
+            socket.on('register', function (data) {
+                if (data.type === 'device') {
+                    clients[data.key] = socket;
+                    console.log('registered a device', data);
+                } else if (data.type === 'board') {
+                    boards.push(socket);
+                    console.log('registered a board', data);
+                }
             });
         });
         console.log('MobileLock server listening on '+config.server.port);

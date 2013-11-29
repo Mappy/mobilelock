@@ -150,12 +150,10 @@
                 });
             });
 
-            console.log(location.protocol+"//"+location.host);
             var socket = io.connect(location.protocol+"//"+location.host);
-            socket.on('news', function (data) {
-                console.log(data);
-                socket.emit('my other event', { my: 'data' });
-                });
+            socket.on('hello', function (data) {
+                socket.emit('register', { 'type': 'device', 'key': localStorage.localKey });
+            });
         })();
     </script>
 </html>

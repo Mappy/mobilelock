@@ -77,30 +77,53 @@
         </ul>
         </section>
     </body>
-    <script type="text/template" id="tpl-devices">
-            <% for (var i in devices) { %>
-            <li><strong><%= devices[i].who %></strong> <%= devices[i].model %> <%= devices[i].os %> <small>(<%= devices[i].ua %>)</small></li>
-            <% }; %>
+    <script type="text/template" id="tpl-device">
+        <li data-id="<%= device.key %>"><strong><%= device.who %></strong> <%= device.model %> <%= device.os %> <small>(<%= device.ua %>)</small></li>
     </script>
     <script src="components/underscore/underscore.js"></script>
     <script src="components/jquery/jquery.js"></script>
+    <script src="components/socket.io-client/dist/socket.io.min.js"></script>
     <script>
         var MobileLock = (function(undefined) {
 
             var $busydevices = $('#busydevices ul');
             var $freedevices = $('#freedevices ul');
-            var tplDevices = _.template($('#tpl-devices').text());
+            var tplDevice = _.template($('#tpl-device').text());
+
+            var populate = function(devices, free, $el) {
+                var devs = _.filter(devices, function(dev) {
+                    return dev.free === free;
+                });
+                var fragment = "";
+                _.each(devs, function(device) {
+                    fragment += tplDevice({'device':device});
+                });
+                $el.html(fragment);
+            };
 
             var launch = function() {
                 $.get('/api/devices', function(devices) {
-                    var busydevs = _.filter(devices, function(dev) {
-                        return dev.free === false;
-                    });
-                    var freedevs = _.filter(devices, function(dev) {
-                        return dev.free === true;
-                    });
-                    $busydevices.html(tplDevices({'devices':busydevs}));
-                    $freedevices.html(tplDevices({'devices':freedevs}));
+                    populate(devices, false, $busydevices);
+                    populate(devices, true, $freedevices);
+                });
+
+                var socket = io.connect(location.protocol+"//"+location.host);
+                socket.on('hello', function (data) {
+                    socket.emit('register', { 'type': 'board' });
+                });
+                socket.on('add', function (data) {
+                    console.log('device added', data);
+                    $busydevices.append(tplDevice({'device':data}));
+                });
+                socket.on('update', function (data) {
+                    console.log('device updated', data);
+                    if (data.free) {
+                        $busydevices.find("[data-id='"+data.key+"']").remove();
+                        $freedevices.append(tplDevice({'device': data}));
+                    } else {
+                        $freedevices.find("[data-id='"+data.key+"']").remove();
+                        $busydevices.append(tplDevice({'device': data}));
+                    }
                 });
             }
             $(launch);
