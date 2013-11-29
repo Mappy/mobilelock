@@ -82,6 +82,7 @@
     <script src="components/underscore/underscore.js"></script>
     <script src="components/jquery/jquery.js"></script>
     <script src="http://faisalman.github.io/ua-parser-js/src/ua-parser.min.js"></script>
+    <script src="components/socket.io-client/dist/socket.io.min.js"></script>
     <script>
         var MobileLock = (function(undefined) {
             $(function() {
@@ -148,6 +149,13 @@
                     });
                 });
             });
+
+            console.log(location.protocol+"//"+location.host);
+            var socket = io.connect(location.protocol+"//"+location.host);
+            socket.on('news', function (data) {
+                console.log(data);
+                socket.emit('my other event', { my: 'data' });
+                });
         })();
     </script>
 </html>

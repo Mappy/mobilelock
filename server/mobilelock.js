@@ -7,6 +7,8 @@ var mobilelock = function(config, resultsFileName, persistedResults) {
     var launch = function() {
         var express = require('express');
         var app = express();
+        var server = require('http').createServer(app);
+        var io = require('socket.io').listen(server);
 
         app.configure(function() {
             app.use(express.compress());
@@ -15,7 +17,7 @@ var mobilelock = function(config, resultsFileName, persistedResults) {
             app.use(express.bodyParser());
             app.use(app.router);
         });
-        app.listen(config.server.port);
+        server.listen(config.server.port);
         app.get('/api/config', function(req, res) {
             res.setHeader('content-type', 'application/json');
             res.send(_.omit(config, 'server'));
@@ -65,6 +67,12 @@ var mobilelock = function(config, resultsFileName, persistedResults) {
                 }
             }
             res.send(status);
+        });
+        io.sockets.on('connection', function (socket) {
+            socket.emit('news', { hello: 'world' });
+            socket.on('my other event', function (data) {
+                console.log(data);
+            });
         });
         console.log('MobileLock server listening on '+config.server.port);
     };
