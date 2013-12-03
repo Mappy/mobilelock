@@ -52,17 +52,19 @@
                 border-spacing: 0;
             }
             /* Custom styles */
-            body     { margin: 0; font-family: sans-serif; }
-            h1       { color: white; background-color: black; text-align: center; margin: 0; padding: 0.3em; font-size: 36px; }
-            section  { margin: .5em; font-size: 16px; }
-            ul       { margin: .5em 1.5em; }
-            li       { list-style-type: square; width: 100%; }
-            small    { display: none; }
-            .date    { display: inline-block; width: 160px; }
-            strong   { display: inline-block; width: 80px; font-weight: bold; }
-            #freedevices strong { font-weight: normal; }
-            #freedevices { color: #104500; }
-            #busydevices { color: #450006; }
+            body                    { margin: 0; font-family: sans-serif; }
+            h1                      { color: white; background-color: black; text-align: center; margin: 0; padding: 0.3em; font-size: 36px; }
+            section                 { margin: .5em; font-size: 16px; }
+            ul                      { margin: .5em 1.5em; }
+            li                      { list-style-type: square; width: 100%; }
+            small                   { display: none; }
+            .date                   { display: inline-block; width: 220px; }
+            strong                  { display: inline-block; width: 80px; font-weight: bold; }
+            #freedevices strong     { font-weight: normal; }
+            #freedevices            { color: #104500; }
+            #busydevices            { color: #450006; }
+            #busydevices .free      { display: none; }
+            #freedevices .busy      { display: none; }
         </style>
     </head>
     <body>
@@ -75,13 +77,13 @@
         </ul>
         </section>
         <section id="freedevices">
-        <h2>Mobiles libres :</h2>
+        <h2>Mobiles disponibles :</h2>
         <ul>
         </ul>
         </section>
     </body>
     <script type="text/template" id="tpl-device">
-        <li data-id="<%= device.key %>"><strong><%= device.who %></strong><span class="date">le <%= moment(device.lastrent).format("DD/MM à HH:MM") %></span><span class="device"><%= device.model %>/<%= device.os %></span><small>(<%= device.ua %>)</small></li>
+        <li data-id="<%= device.key %>"><strong><%= device.who %></strong><span class="date"><span class="busy">pris</span><span class="free">rendu</span> le <%= moment(device.lastrent).format("DD/MM à HH:MM") %></span><span class="device"><%= device.model %> / <%= device.os %></span><small>(<%= device.ua %>)</small></li>
     </script>
     <script src="components/underscore/underscore.js"></script>
     <script src="components/jquery/jquery.js"></script>
