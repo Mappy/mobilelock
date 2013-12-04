@@ -77,6 +77,7 @@ var mobilelock = function(config, resultsFileName, persistedResults) {
                 var device = devices[req.body.key];
                 if (device) {
                     device.free = true;
+                    device.lastrent = new Date();
                     sendToBoards('update', device);
                 }
             }
