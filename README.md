@@ -1,6 +1,5 @@
 # Mobile Lock
 
-
 ## Dependencies
 
 You’ll need node, npm and bower (npm install -g bower).
@@ -11,7 +10,7 @@ To use it, you‘ll need to :
   1. launch `npm install` to install server dependencies,
   2. launch `bower install` to install client dependencies,
   3. then launch the server with `make run`,
-  4. open your browser on `http://localhost:8000/`.
+  4. open your browser on `http://localhost:4400/`.
 
 ## Run in production
 

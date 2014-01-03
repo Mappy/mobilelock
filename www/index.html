@@ -104,7 +104,7 @@
                         var parser = new UAParser();
                         parser.setUA(ua); 
                         var device = parser.getDevice();
-                        var os = parser.getOS()
+                        var os = parser.getOS();
                         $('.model').val(device.vendor+ " "+device.model);
                         $('.os').val(os.name+" "+ os.version );
                     }
