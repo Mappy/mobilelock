@@ -1,5 +1,13 @@
 # Mobile Lock
 
+That applications is a device (phone, tablet, etc) rental manager build during a Mappy hackaton.
+
+It’s composed of 2 parts :
+- a client page, used from the device to lock / unlock,
+- a board page, listing all in-use of free devices.
+
+A simple phonegap app, containing an index.html page with a redirection to that service is used to deploy on devices.
+
 ## Dependencies
 
 You’ll need node, npm and bower (npm install -g bower).
