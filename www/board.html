@@ -3,6 +3,8 @@
     <head>
         <title>Mobile Lock</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="apple-touch-icon" sizes="120x120" href="images/lock_icon_120x120.png">
+        <link rel="shortcut icon" sizes="196x196" href="images/lock_icon_196x196.png">
         <style>
             /* http://meyerweb.com/eric/tools/css/reset/ 
             v2.0 | 20110126
@@ -83,10 +85,10 @@
         </section>
     </body>
     <script type="text/template" id="tpl-device">
-        <li data-id="<%= device.key %>"><strong><%= device.who %></strong><span class="date"><span class="busy">pris</span><span class="free">rendu</span> le <%= moment(device.lastrent).format("DD/MM à HH:MM") %></span><span class="device"><%= device.model %> / <%= device.os %></span><small>(<%= device.ua %>)</small></li>
+        <li data-id="<%= device.uuid %>"><strong><%= device.who %></strong><span class="date"><span class="busy">pris</span><span class="free">rendu</span> le <%= moment(device.lastrent).format("DD/MM à HH:MM") %></span><span class="device"><%= device.model %> / <%= device.os %></span><small>(<%= device.ua %>)</small></li>
     </script>
     <script src="components/underscore/underscore.js"></script>
-    <script src="components/jquery/jquery.js"></script>
+    <script src="components/zepto/zepto.js"></script>
     <script src="components/socket.io-client/dist/socket.io.min.js"></script>
     <script src="components/moment/min/moment.min.js"></script>
     <script>
@@ -123,8 +125,8 @@
                 });
                 socket.on('update', function (data) {
                     console.log('device updated', data);
-                    $busydevices.find("[data-id='"+data.key+"']").remove();
-                    $freedevices.find("[data-id='"+data.key+"']").remove();
+                    $busydevices.find("[data-id='"+data.uuid+"']").remove();
+                    $freedevices.find("[data-id='"+data.uuid+"']").remove();
                     var device = tplDevice({'device': data});
                     if (data.free) {
                         $freedevices.append(device);

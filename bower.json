@@ -1,10 +1,12 @@
 {
-    "name": "mobilelock",
-    "version": "0.1.0",
-    "dependencies": {
-        "underscore": "latest",
-        "jquery": "latest",
-        "socket.io-client": "latest",
-        "moment": "latest"
-    }
+  "name": "mobilelock",
+  "version": "0.1.0",
+  "dependencies": {
+    "underscore": "1.5.*",
+    "zepto": "1.1.*",
+    "socket.io-client": "0.9.*",
+    "moment": "2.5.*",
+    "ua-parser-js": "0.6.*",
+    "cryptojs-sha256": "http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/sha256.js"
+  }
 }

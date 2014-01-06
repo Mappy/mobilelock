@@ -4,9 +4,9 @@
         <title>Mobile Lock</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="apple-mobile-web-app-capable" content="yes">
-        <link rel="apple-touch-icon" sizes="120x120" href="images/lock_icon_120x120.png">
         <meta name="mobile-web-app-capable" content="yes">
-        <link rel="shortcut icon" sizes="196x196" href="images/lock_icon_196x196.png">        
+        <link rel="apple-touch-icon" sizes="120x120" href="images/lock_icon_120x120.png">
+        <link rel="shortcut icon" sizes="196x196" href="images/lock_icon_196x196.png">
         <style>
             /* http://meyerweb.com/eric/tools/css/reset/ 
             v2.0 | 20110126
@@ -59,7 +59,7 @@
             body            { margin: 0; font-family: sans-serif; }
             h1              { color: white; background-color: black; text-align: center; margin: 0; padding: 0.3em; font-size: 36px; }
             a               { text-decoration: none; font-size: 24px; }
-            div             { width: 90%; margin: 1em auto auto auto; text-align: center; }
+            section         { width: 90%; margin: 1em auto auto auto; text-align: center; }
             input           { display: block; font-size: 24px; width: 100%; text-align: center; margin-bottom: .25em; border: 1px solid white; -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;  }
             .trigramme      { text-transform: uppercase; }
             .busy           { background-color: #D95366; }
@@ -72,93 +72,106 @@
     <body class="free">
         <h1>Mobile Lock</h1>
         <section>
-            <div class="lock">
-                <input type="text" class="trigramme" placeholder="Trigramme" autocomplete="off" maxlength=4 />
+                <input type="text" class="lock trigramme" placeholder="Trigramme" autocomplete="off" maxlength=4 />
                 <input type="text" class="model" placeholder="Modèle" />
                 <input type="text" class="os" placeholder="OS" />
-                <a href="">Lock</a>
-            </div>
-            <div class="unlock">
-                <a href="">Unlock</a>
-            </div>
+                <a class="lock" href="">Lock</a>
+                <a class="unlock" href="">Unlock</a>
         </section>
     </body>
     <script src="components/underscore/underscore.js"></script>
-    <script src="components/jquery/jquery.js"></script>
-    <script src="http://faisalman.github.io/ua-parser-js/src/ua-parser.min.js"></script>
+    <script src="components/zepto/zepto.js"></script>
+    <script src="components/cryptojs-sha256/index.js"></script>
+    <script src="components/ua-parser-js/src/ua-parser.js"></script>
     <script src="components/socket.io-client/dist/socket.io.min.js"></script>
     <script>
         var MobileLock = (function(undefined) {
             $(function() {
 
-                if (!localStorage.localKey) {
-                    localStorage.localKey = +new Date() + "-" + Math.random();
+                if (!localStorage.uuid) {
+                    var randomKey = +new Date() + "-" + Math.random();
+                    localStorage.uuid = CryptoJS.SHA256(randomKey).toString();
+                }
+
+                if (localStorage.who) {
+                    $('input.trigramme').val(localStorage.who);
                 }
 
                 var initForm = function() {
-                    if (localStorage.os && localStorage.model) {
-                        $('.model').hide();
-                        $('.os').hide();
-                    } else {
-                        var ua = navigator.userAgent;
-                        var parser = new UAParser();
-                        parser.setUA(ua); 
-                        var device = parser.getDevice();
-                        var os = parser.getOS();
-                        $('.model').val(device.vendor+ " "+device.model);
-                        $('.os').val(os.name+" "+ os.version );
-                    }
+                    var ua = navigator.userAgent;
+                    var parser = new UAParser();
+                    parser.setUA(ua);
+                    var device = parser.getDevice();
+                    var os = parser.getOS();
+                    $('.model').val(device.vendor+ " "+device.model);
+                    $('.os').val(os.name+" "+ os.version );
                 };
 
-                if (localStorage.localKey) {
-                    $.get('/api/isLocked', { 'key': localStorage.localKey }, function(data, textStatus, xhr) {
-                        if (data.free !== true) {
-                            $('body').removeClass('free').addClass('busy');
+                if (localStorage.uuid) {
+                    $.ajax({
+                        'url':'/api/isLocked',
+                        'data': { 'uuid': localStorage.uuid },
+                        'success': function(data, textStatus, xhr) {
+                            $('.model').val(data.model).attr('disabled', 'disabled');
+                            $('.os').val(data.os).attr('disabled', 'disabled');
+                            if (data.free !== true) {
+                                $('body').removeClass('free').addClass('busy');
+                            }
+                        },
+                        'error': function(xhr) {
+                            initForm();
                         }
-                    }).error(function(xhr) {
-                        initForm();
                     });
                 } else {
                     initForm();
                 }
 
-                $('.lock a').click(function(e) {
+                $('a.lock').click(function(e) {
                     e.preventDefault();
                     var who = $('input.trigramme').val();
                     if (who.length === 0) {
                         alert('Veuillez saisir un trigramme');
                     } else {
                         localStorage.who = who.toUpperCase();
-                        if(!localStorage.os) {
-                            localStorage.os = $('.os').val();
-                        }
-                        if(!localStorage.model) {
-                            localStorage.model = $('.model').val();
-                        }
-                        $.post('/api/lock', { 'who': localStorage.who, 'key': localStorage.localKey, 'os': localStorage.os, 'model': localStorage.model }, function(data, textStatus, xhr) {
-                            $('body').removeClass('free').addClass('busy');
-                            $('.model').hide();
-                            $('.os').hide();
-                            localStorage.lock = true;
-                        }).error(function(xhr, textStatus, error) {
-                            alert('Une erreur est survenue : '+xhr.status);
+                        $.ajax({
+                            'type': 'post',
+                            'url':'/api/lock',
+                            'data': {
+                                'who': localStorage.who,
+                                'uuid': localStorage.uuid,
+                                'os': $('.os').val(),
+                                'model': $('.model').val()
+                            },
+                            'success': function(data, textStatus, xhr) {
+                                $('body').removeClass('free').addClass('busy');
+                                $('.model').attr('disabled', 'disabled');
+                                $('.os').attr('disabled', 'disabled');
+                            },
+                            'error': function(xhr, textStatus, error) {
+                                alert('Une erreur est survenue : '+xhr.status);
+                            }
                         });
                     }
                 });
-                $('.unlock a').click(function(e) {
+                $('a.unlock').click(function(e) {
                     e.preventDefault();
-                    $.post('/api/unlock', { 'key': localStorage.localKey }, function(data, textStatus, xhr) {
-                        $('body').addClass('free').removeClass('busy');
-                        localStorage.lock = false;
-                    }).error(function(xhr, textStatus, error) {
-                        alert('Une erreur est survenue : '+xhr.status);
+                    $.ajax({
+                        'type': 'post',
+                        'url':'/api/unlock',
+                        'data': { 'uuid': localStorage.uuid },
+                        'success': function(data, textStatus, xhr) {
+                            $('body').addClass('free').removeClass('busy');
+                        },
+                        'error': function(xhr, textStatus, error) {
+                            alert('Une erreur est survenue : '+xhr.status);
+                        }
                     });
                 });
             });
 
             var socket = io.connect(location.protocol+"//"+location.host);
             socket.on('hello', function (data) {
-                socket.emit('register', { 'type': 'device', 'key': localStorage.localKey });
+                socket.emit('register', { 'type': 'device', 'uuid': localStorage.uuid });
             });
         })();
     </script>

@@ -10,6 +10,8 @@ var mobilelock = function(config, resultsFileName, persistedResults) {
         var server = require('http').createServer(app);
         var io = require('socket.io').listen(server);
 
+        var statusCodeMissingParameters = 400;
+
         var boards = []; // socket.io - boards
         var clients = {}; // socket.io - clients / devices
 
@@ -17,7 +19,7 @@ var mobilelock = function(config, resultsFileName, persistedResults) {
             for(var i in boards) {
                 boards[i].emit(t, msg);
             }
-        }
+        };
 
         app.configure(function() {
             app.use(express.compress());
@@ -37,10 +39,10 @@ var mobilelock = function(config, resultsFileName, persistedResults) {
         });
         app.get('/api/isLocked', function(req, res) {
             res.setHeader('content-type', 'application/json');
-            if (!req.query.key) {
-                res.send(418); // I’m a teapot... :-D
+            if (!req.query.uuid) {
+                res.send(statusCodeMissingParameters);
             } else {
-                var device = devices[req.body.key];
+                var device = devices[req.query.uuid];
                 if (device) {
                     res.send(JSON.stringify(device));
                 } else {
@@ -50,31 +52,35 @@ var mobilelock = function(config, resultsFileName, persistedResults) {
             }
         });
         app.post('/api/lock', function(req, res) {
-            var ua = req.get('User-Agent');
             var status = 200;
-            if (!ua || !req.body.key || !req.body.who) {
-                status = 418; // I’m a teapot... :-D
+            var ua = req.get('User-Agent');
+            if (!ua || !req.body.uuid || !req.body.who) {
+                status = statusCodeMissingParameters;
             } else {
-                var device = devices[req.body.key];
-                if (device) {
-                    device.who = req.body.who;
-                    device.free = false;
-                    device.lastrent = new Date();
-                    sendToBoards('update', device);
-                } else {
-                    var newDevice = { 'key': req.body.key, 'who': req.body.who, 'ua': ua, 'model': req.body.model, 'os': req.body.os, 'free': false };
-                    devices[req.body.key] = newDevice;
-                    sendToBoards('add', newDevice);
+                var knownDevice = devices[req.body.uuid];
+                if (knownDevice) {
+                    knownDevice.who = req.body.who;
+                    knownDevice.free = false;
+                    knownDevice.lastrent = new Date();
+                    sendToBoards('update', knownDevice);
+                } else  {
+                    if (!req.body.model || !req.body.os) {
+                        status = statusCodeMissingParameters;
+                    } else {
+                        var newDevice = { 'uuid': req.body.uuid, 'who': req.body.who, 'ua': ua, 'model': req.body.model, 'os': req.body.os, 'free': false };
+                        devices[req.body.uuid] = newDevice;
+                        sendToBoards('add', newDevice);
+                    }
                 }
             }
             res.send(status);
         });
         app.post('/api/unlock', function(req, res) {
             var status = 200;
-            if (!req.body.key) {
-                status = 418; // I’m a teapot... :-D
+            if (!req.body.uuid) {
+                status = statusCodeMissingParameters;
             } else {
-                var device = devices[req.body.key];
+                var device = devices[req.body.uuid];
                 if (device) {
                     device.free = true;
                     device.lastrent = new Date();
@@ -88,7 +94,7 @@ var mobilelock = function(config, resultsFileName, persistedResults) {
             socket.emit('hello', { 'hello': 'world' });
             socket.on('register', function (data) {
                 if (data.type === 'device') {
-                    clients[data.key] = socket;
+                    clients[data.uuid] = socket;
                     console.log('registered a device', data);
                 } else if (data.type === 'board') {
                     boards.push(socket);
