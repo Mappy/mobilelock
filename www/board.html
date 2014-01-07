@@ -52,27 +52,30 @@
                 border-spacing: 0;
             }
             /* Custom styles */
-            body                    { margin: 0; font-family: sans-serif; }
-            h1                      { color: white; background-color: black; text-align: center; margin: 0; padding: 0.3em; font-size: 36px; }
-            h2                      { margin-top: 1.5em; }
-            section                 { margin: .5em; font-size: 16px; }
-            table                   { margin: .5em; width: 100%; border-top: 1px solid grey; }
-            tr                      { border-bottom: 1px solid grey;  }
-            tr:hover                { cursor: pointer;  }
-            td                      { padding: .3em; }
-            th                      { font-style: italic; }
-            td.device               { width: 60%; }
-            td.who, td.date         { text-align: center; }
-            #freedevices            { color: #104500; }
-            #busydevices            { color: #450006; }
-            #busydevices .free      { display: none; }
-            #freedevices .busy      { display: none; }
-            .os:before              { display: inline-block; padding: 0 5px; content: "-" }
-            .sim:before                { content: "- SIM" }
-            input[type=text]           { width: 40%; border: 1px solid black; margin: 0 .1em; padding: .1em; }
-            button, input[type=submit] { background-color: grey; color: white; padding: .5em; border: 0; border-radius: 4px; cursor: pointer; }
-            .delete                    { background-color: red; }
-            .hidden                    { display: none; }
+            body                        { margin: 0; font-family: sans-serif; }
+            h1                          { color: white; background-color: black; text-align: center; margin: 0; padding: 0.3em; font-size: 36px; }
+            h2                          { margin-top: 1.5em; }
+            section                     { margin: .5em; font-size: 16px; }
+            table                       { margin: .5em; width: 100%; border-top: 1px solid grey; }
+            tr                          { border-bottom: 1px solid grey;  }
+            tr:hover                    { cursor: pointer;  }
+            td                          { padding: .3em; }
+            th                          { font-style: italic; }
+            td.device                   { width: 60%; }
+            td.who, td.date             { text-align: center; }
+            #freedevices                { color: #104500; }
+            #busydevices                { color: #450006; }
+            #busydevices .free          { display: none; }
+            #freedevices .busy          { display: none; }
+            .os:before                  { display: inline-block; padding: 0 5px; content: "-" }
+            .sim:before                 { content: "- SIM" }
+            input[type=text]            { width: 38%; border: 1px solid black; margin: 0 .1em; padding: .1em; }
+            button,
+            input[type=submit],
+            input[type=reset]           { background-color: grey; color: white; padding: .5em; border: 0; border-radius: 4px; cursor: pointer; }
+            input[type=submit]          { background-color: green; }
+            .delete                     { background-color: red; }
+            .hidden                     { display: none; }
         </style>
     </head>
     <body>
@@ -121,6 +124,7 @@
                 <% } %>
                 <input type="text" class="model hidden" value="<%= device.model %>"/>
                 <input type="text" class="os hidden" value="<%= device.os %>" />
+                <input type="reset" class="hidden" />
                 <input type="submit" class="hidden" />
                 <button class="delete hidden">Supprimer</button>
             </td>
@@ -192,6 +196,21 @@
                     $(this).find('input').removeClass('hidden');
                     $('.delete').addClass('hidden');
 
+                    $(this).find('input.os').val($(this).find('span.os').text());
+                    $(this).find('input.model').val($(this).find('span.model').text());
+
+                    var exitEditionMode = function() {
+                        $(this).find('span').removeClass('hidden');
+                        $(this).find('input').addClass('hidden');
+                        $(this).find('input[type=submit]').off('click');
+                        $(this).find('input[type=reset]').off('click');
+                    };
+
+                    $(this).find('input[type=reset]').click(_.bind(function(e) {
+                        e.stopPropagation();
+                        exitEditionMode.call(this);
+                    }, this));
+
                     $(this).find('input[type=submit]').click(_.bind(function(e) {
                         e.stopPropagation();
                         var os = $(this).find('input.os').val();
@@ -199,10 +218,8 @@
                         var uuid = $(this).parents('tr').data('uuid');
                         $(this).find('span.os').text(os);
                         $(this).find('span.model').text(model);
-                        $(this).find('span').removeClass('hidden');
-                        $(this).find('input').addClass('hidden');
-                        $(this).find('input[type=submit]').off('click');
                         socket.emit('rename', { 'uuid': uuid, 'model': model, 'os': os });
+                        exitEditionMode.call(this);
                     }, this));
                 });
 
