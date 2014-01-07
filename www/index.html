@@ -147,7 +147,15 @@
                                 $('.os').attr('disabled', 'disabled');
                             },
                             'error': function(xhr, textStatus, error) {
-                                alert('Une erreur est survenue : '+xhr.status);
+                                switch(xhr.status) {
+                                    case 409:
+                                        alert('Ce téléphone est déjà enregistré.');
+                                        break;
+                                    case 400:
+                                    default:
+                                        alert('Une erreur est survenue.');
+                                        console.error(xhr, textStatus, error);
+                                }
                             }
                         });
                     }

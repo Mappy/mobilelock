@@ -67,9 +67,18 @@ var mobilelock = function(config, resultsFileName, persistedResults) {
                     if (!req.body.model || !req.body.os) {
                         status = statusCodeMissingParameters;
                     } else {
-                        var newDevice = { 'uuid': req.body.uuid, 'who': req.body.who, 'ua': ua, 'model': req.body.model, 'os': req.body.os, 'free': false };
-                        devices[req.body.uuid] = newDevice;
-                        sendToBoards('add', newDevice);
+                        var modelAlreadyListed = _.find(devices, function(device) {
+                            if (device.model === req.body.model) {
+                                return device;
+                            }
+                        });
+                        if (modelAlreadyListed) {
+                            status = 409; // Conclict : device already exists
+                        } else {
+                            var newDevice = { 'uuid': req.body.uuid, 'who': req.body.who, 'ua': ua, 'model': req.body.model, 'os': req.body.os, 'free': false };
+                            devices[req.body.uuid] = newDevice;
+                            sendToBoards('add', newDevice);
+                        }
                     }
                 }
             }
