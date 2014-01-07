@@ -131,6 +131,20 @@ var mobilelock = function (config) {
                 }
                 sendToBoards('rename', data);
             });
+            socket.on('disconnect', function () {
+                for(var i in boards) {
+                    if (boards[i] === socket) {
+                        delete boards[i];
+                        break;
+                    }
+                }
+                for(var i in clients) {
+                    if (clients[i] === socket) {
+                        delete clients[i];
+                        break;
+                    }
+                }
+            });
         });
         console.log('MobileLock server listening on '+config.server.port);
     };
