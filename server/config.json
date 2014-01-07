@@ -1,5 +1,9 @@
 {
     "server": {
         "port": 4400
+    },
+    "devices": {
+        "storeName": "persisted-results.json"
     }
 }
+

@@ -1,5 +1,13 @@
 var should = require('should');
-var mobilelock = require('../server/mobilelock')();
+
+var mobilelock = require('../server/mobilelock')({
+    server: {
+        port: '4400'
+    },
+    devices: {
+        storeName: 'test.json'
+    }
+});
 
 describe('Mobilelock server', function() {
     describe('mobilelock.js#?', function() {
@@ -8,3 +16,4 @@ describe('Mobilelock server', function() {
         });
     });
 });
+
