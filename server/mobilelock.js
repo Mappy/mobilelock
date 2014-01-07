@@ -1,4 +1,5 @@
 var _ = require('underscore');
+var path = require('path');
 
 var mobilelock = function(config, resultsFileName, persistedResults) {
 
@@ -23,12 +24,15 @@ var mobilelock = function(config, resultsFileName, persistedResults) {
 
         app.configure(function() {
             app.use(express.compress());
-            app.use(express.static( __dirname+'/../www'));
+            app.use(express.static(path.resolve(__dirname+'/../www')));
             app.use(express.logger());
             app.use(express.bodyParser());
             app.use(app.router);
         });
         server.listen(config.server.port);
+        app.get('/board', function(req,res){
+            res.sendfile(path.resolve(__dirname + '/../www/board.html'));
+        });
         app.get('/api/config', function(req, res) {
             res.setHeader('content-type', 'application/json');
             res.send(_.omit(config, 'server'));
