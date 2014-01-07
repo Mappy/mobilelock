@@ -69,6 +69,7 @@
             #busydevices .free      { display: none; }
             #freedevices .busy      { display: none; }
             .os:before              { display: inline-block; padding: 0 5px; content: "-" }
+            .sim:before             { content: "- SIM" }
             input[type=text]        { width: 40%; border: 1px solid black; margin: 0 .1em; padding: .1em; }
         </style>
     </head>
@@ -111,7 +112,11 @@
                 le <%= moment(device.lastrent).format("DD/MM à HH:MM") %>
             </td>
             <td class="device">
-                <span class="model"><%= device.model %></span><span class="os"><%= device.os %></span>
+                <span class="model"><%= device.model %></span>
+                <span class="os"><%= device.os %></span>
+                <% if (device.hasSim) { %>
+                    <span class="sim"></span>
+                <% } %>
                 <input type="text" class="model" value="<%= device.model %>"/><input type="text" class="os" value="<%= device.os %>" />
                 <input type="submit">
             </td>
@@ -120,8 +125,8 @@
     </script>
     <script src="components/underscore/underscore.js"></script>
     <script src="components/zepto/zepto.js"></script>
-    <script src="components/socket.io-client/dist/socket.io.min.js"></script>
     <script src="components/moment/min/moment.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script>
         var MobileLock = (function(undefined) {
 

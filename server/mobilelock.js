@@ -66,6 +66,7 @@ var mobilelock = function (config) {
                     knownDevice.who = req.body.who;
                     knownDevice.free = false;
                     knownDevice.lastrent = new Date();
+                    knownDevice.hasSim = req.body.hasSim === 'true';
                     sendToBoards('update', knownDevice);
                 } else  {
                     if (!req.body.model || !req.body.os) {
@@ -75,7 +76,15 @@ var mobilelock = function (config) {
                         if (modelAlreadyListed) {
                             status = 409; // Conclict : device already exists
                         } else {
-                            var newDevice = { 'uuid': req.body.uuid, 'who': req.body.who, 'ua': ua, 'model': req.body.model, 'os': req.body.os, 'free': false };
+                            var newDevice = {
+                                'uuid': req.body.uuid,
+                                'who': req.body.who,
+                                'ua': ua,
+                                'model': req.body.model,
+                                'os': req.body.os,
+                                'free': false,
+                                hasSim: req.body.hasSim === 'true'
+                            };
                             devices.add(newDevice);
                             sendToBoards('add', newDevice);
                         }
