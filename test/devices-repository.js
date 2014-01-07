@@ -77,6 +77,17 @@ describe('devices-repository', function () {
         });
     });
 
+    describe('remove()', function () {
+        var devicesRepository = getDevicesRepository();
+
+        it('should removes the device from the collection', function () {
+            var device = getNewDevice();
+            devicesRepository.add(device);
+            devicesRepository.remove(device.uuid);
+            should.not.exist(devicesRepository.get(device.uuid));
+        });
+    });
+
     describe('persist()', function () {
         var devicesRepository   = getDevicesRepository(),
             fsWriteFileSyncSpy  = sinon.spy(),

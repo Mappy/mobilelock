@@ -30,6 +30,10 @@ DevicesRepository.prototype.getByModel = function (model) {
     });
 };
 
+DevicesRepository.prototype.remove = function (uuid) {
+    delete this._devices[uuid];
+};
+
 DevicesRepository.prototype.persist = function () {
     fs.writeFileSync(this._storeName, JSON.stringify(this._devices));
 };

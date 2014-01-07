@@ -63,14 +63,16 @@
             th                      { font-style: italic; }
             td.device               { width: 60%; }
             td.who, td.date         { text-align: center; }
-            td input                { display: none; }
             #freedevices            { color: #104500; }
             #busydevices            { color: #450006; }
             #busydevices .free      { display: none; }
             #freedevices .busy      { display: none; }
             .os:before              { display: inline-block; padding: 0 5px; content: "-" }
-            .sim:before             { content: "- SIM" }
-            input[type=text]        { width: 40%; border: 1px solid black; margin: 0 .1em; padding: .1em; }
+            .sim:before                { content: "- SIM" }
+            input[type=text]           { width: 40%; border: 1px solid black; margin: 0 .1em; padding: .1em; }
+            button, input[type=submit] { background-color: grey; color: white; padding: .5em; border: 0; border-radius: 4px; cursor: pointer; }
+            .delete                    { background-color: red; }
+            .hidden                    { display: none; }
         </style>
     </head>
     <body>
@@ -117,8 +119,10 @@
                 <% if (device.hasSim) { %>
                     <span class="sim"></span>
                 <% } %>
-                <input type="text" class="model" value="<%= device.model %>"/><input type="text" class="os" value="<%= device.os %>" />
-                <input type="submit">
+                <input type="text" class="model hidden" value="<%= device.model %>"/>
+                <input type="text" class="os hidden" value="<%= device.os %>" />
+                <input type="submit" class="hidden" />
+                <button class="delete hidden">Supprimer</button>
             </td>
             <!-- For debug / inspection : <%= device.ua %> -->
         </tr>
@@ -178,11 +182,16 @@
                     device.find('span.os').text(data.os);
                     device.find('span.model').text(data.model);
                 });
+                socket.on('remove', function (uuid) {
+                    $('[data-uuid="' + uuid + '"]').remove();
+                });
 
                 $('table').on('click', 'td.device', function(e) {
                     e.stopPropagation();
-                    $(this).find('span').hide();
-                    $(this).find('input').show();
+                    $(this).find('span').addClass('hidden');
+                    $(this).find('input').removeClass('hidden');
+                    $('.delete').addClass('hidden');
+
                     $(this).find('input[type=submit]').click(_.bind(function(e) {
                         e.stopPropagation();
                         var os = $(this).find('input.os').val();
@@ -190,12 +199,31 @@
                         var uuid = $(this).parents('tr').data('uuid');
                         $(this).find('span.os').text(os);
                         $(this).find('span.model').text(model);
-                        $(this).find('span').show();
-                        $(this).find('input').hide();
+                        $(this).find('span').removeClass('hidden');
+                        $(this).find('input').addClass('hidden');
                         $(this).find('input[type=submit]').off('click');
                         socket.emit('rename', { 'uuid': uuid, 'model': model, 'os': os });
                     }, this));
                 });
+
+                $freedevices.find('tbody')
+                            .on('mouseover', 'tr', function () {
+                                if ($(this).find('input.os').hasClass('hidden')) {
+                                    $('.delete').removeClass('hidden');
+                                }
+                            })
+                            .on('mouseout', 'tr', function () {
+                                $('.delete').addClass('hidden');
+                            })
+                            .on('click', '.delete', function (e) {
+                                e.stopPropagation();
+                                var $row         = $(this).closest('tr'),
+                                    what         = $row.find('input.model').val() + ' - ' + $row.find('input.os').val(),
+                                    shouldDelete = confirm('Supprimer le périphérique "' + what + '" ?');
+                                if (shouldDelete) {
+                                    socket.emit('remove', $row.data('uuid'));
+                                }
+                            });
             }
             $(launch);
         })();

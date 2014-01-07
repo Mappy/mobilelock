@@ -131,6 +131,10 @@ var mobilelock = function (config) {
                 }
                 sendToBoards('rename', data);
             });
+            socket.on('remove', function (uuid) {
+                devices.remove(uuid);
+                sendToBoards('remove', uuid);
+            });
             socket.on('disconnect', function () {
                 for(var i in boards) {
                     if (boards[i] === socket) {
