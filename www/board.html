@@ -54,13 +54,14 @@
             /* Custom styles */
             body                    { margin: 0; font-family: sans-serif; }
             h1                      { color: white; background-color: black; text-align: center; margin: 0; padding: 0.3em; font-size: 36px; }
+            h2                      { margin-top: 1.5em; }
             section                 { margin: .5em; font-size: 16px; }
-            ul                      { margin: .5em 1.5em; }
-            li                      { list-style-type: square; width: 100%; }
-            small                   { display: none; }
-            .date                   { display: inline-block; width: 220px; }
-            strong                  { display: inline-block; width: 80px; font-weight: bold; }
-            #freedevices strong     { font-weight: normal; }
+            table                   { margin: .5em; width: 100%; border-top: 1px solid grey; }
+            tr                      { border-bottom: 1px solid grey;  }
+            td                      { padding: .3em; }
+            th                      { font-style: italic; }
+            td.device               { width: 60%; }
+            td.who, td.date         { text-align: center; }
             #freedevices            { color: #104500; }
             #busydevices            { color: #450006; }
             #busydevices .free      { display: none; }
@@ -69,21 +70,45 @@
     </head>
     <body>
         <h1>Mobile Lock</h1>
-        <section id="add">
-        </section>
         <section id="busydevices">
-        <h2>Mobiles en cours d’utilisation :</h2>
-        <ul>
-        </ul>
+            <h2><span class="count"></span> périphèrique(s) en cours d’utilisation :</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Qui ?</th>
+                        <th>Quand ?</th>
+                        <th>Quoi ?</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </section>
         <section id="freedevices">
-        <h2>Mobiles disponibles :</h2>
-        <ul>
-        </ul>
+            <h2><span class="count"></span> périphèrique(s) disponible(s) :</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Qui ?</th>
+                        <th>Quand ?</th>
+                        <th>Quoi ?</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </section>
+        <section id="add"></section>
     </body>
     <script type="text/template" id="tpl-device">
-        <li data-id="<%= device.uuid %>"><strong><%= device.who %></strong><span class="date"><span class="busy">pris</span><span class="free">rendu</span> le <%= moment(device.lastrent).format("DD/MM à HH:MM") %></span><span class="device"><%= device.model %> / <%= device.os %></span><small>(<%= device.ua %>)</small></li>
+        <tr data-id="<%= device.uuid %>">
+            <td class="who"><%= device.who %></td>
+            <td class="date">
+                <span class="busy">pris</span>
+                <span class="free">rendu</span>
+                le <%= moment(device.lastrent).format("DD/MM à HH:MM") %>
+            </td>
+            <td class="device"><%= device.model %> / <%= device.os %></td>
+            <!-- <%= device.ua %> -->
+        </tr>
     </script>
     <script src="components/underscore/underscore.js"></script>
     <script src="components/zepto/zepto.js"></script>
@@ -92,8 +117,8 @@
     <script>
         var MobileLock = (function(undefined) {
 
-            var $busydevices = $('#busydevices ul');
-            var $freedevices = $('#freedevices ul');
+            var $busydevices = $('#busydevices');
+            var $freedevices = $('#freedevices');
             var tplDevice = _.template($('#tpl-device').text());
 
             var populate = function(devices, free, $el) {
@@ -104,7 +129,8 @@
                 _.each(devs, function(device) {
                     fragment += tplDevice({'device':device});
                 });
-                $el.html(fragment);
+                $el.find('.count').html(devs.length);
+                $el.find('table tbody').html(fragment);
             };
 
             var launch = function() {
