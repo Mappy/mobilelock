@@ -153,7 +153,7 @@
                 });
                 socket.on('add', function (data) {
                     console.log('device added', data);
-                    $busydevices.append(tplDevice({'device':data}));
+                    $busydevices.find('table tbody').append(tplDevice({'device':data}));
                 });
                 socket.on('update', function (data) {
                     console.log('device updated', data);
