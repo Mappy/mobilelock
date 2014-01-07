@@ -71,7 +71,7 @@ var mobilelock = function (config) {
                     if (!req.body.model || !req.body.os) {
                         status = statusCodeMissingParameters;
                     } else {
-                        var modelAlreadyListed = devices.findByModel(req.body.model);
+                        var modelAlreadyListed = devices.getByModel(req.body.model);
                         if (modelAlreadyListed) {
                             status = 409; // Conclict : device already exists
                         } else {
@@ -109,6 +109,18 @@ var mobilelock = function (config) {
                     boards.push(socket);
                     console.log('registered a board', data);
                 }
+            });
+            socket.on('rename', function (data) {
+                console.log('A device has been renamed', data);
+                var device = devices.get(data.uuid);
+                if (device) {
+                    device.model = data.model;
+                    device.os = data.os;
+                }
+                if (clients[data.uuid]) {
+                    clients[data.uuid].emit('rename', data);
+                }
+                sendToBoards('rename', data);
             });
         });
         console.log('MobileLock server listening on '+config.server.port);

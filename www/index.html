@@ -180,6 +180,12 @@
             socket.on('hello', function (data) {
                 socket.emit('register', { 'type': 'device', 'uuid': localStorage.uuid });
             });
+            socket.on('rename', function (data) {
+                if (data.uuid === localStorage.uuid) {
+                    $('input.os').val(data.os);
+                    $('input.model').val(data.model);
+                }
+            });
         })();
     </script>
 </html>

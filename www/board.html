@@ -58,14 +58,18 @@
             section                 { margin: .5em; font-size: 16px; }
             table                   { margin: .5em; width: 100%; border-top: 1px solid grey; }
             tr                      { border-bottom: 1px solid grey;  }
+            tr:hover                { cursor: pointer;  }
             td                      { padding: .3em; }
             th                      { font-style: italic; }
             td.device               { width: 60%; }
             td.who, td.date         { text-align: center; }
+            td input                { display: none; }
             #freedevices            { color: #104500; }
             #busydevices            { color: #450006; }
             #busydevices .free      { display: none; }
             #freedevices .busy      { display: none; }
+            .os:before              { display: inline-block; padding: 0 5px; content: "-" }
+            input[type=text]        { width: 40%; border: 1px solid black; margin: 0 .1em; padding: .1em; }
         </style>
     </head>
     <body>
@@ -99,15 +103,19 @@
         <section id="add"></section>
     </body>
     <script type="text/template" id="tpl-device">
-        <tr data-id="<%= device.uuid %>">
+        <tr data-uuid="<%= device.uuid %>">
             <td class="who"><%= device.who %></td>
             <td class="date">
                 <span class="busy">pris</span>
                 <span class="free">rendu</span>
                 le <%= moment(device.lastrent).format("DD/MM à HH:MM") %>
             </td>
-            <td class="device"><%= device.model %> / <%= device.os %></td>
-            <!-- <%= device.ua %> -->
+            <td class="device">
+                <span class="model"><%= device.model %></span><span class="os"><%= device.os %></span>
+                <input type="text" class="model" value="<%= device.model %>"/><input type="text" class="os" value="<%= device.os %>" />
+                <input type="submit">
+            </td>
+            <!-- For debug / inspection : <%= device.ua %> -->
         </tr>
     </script>
     <script src="components/underscore/underscore.js"></script>
@@ -149,14 +157,39 @@
                 });
                 socket.on('update', function (data) {
                     console.log('device updated', data);
-                    $busydevices.find("[data-id='"+data.uuid+"']").remove();
-                    $freedevices.find("[data-id='"+data.uuid+"']").remove();
+                    $busydevices.find("[data-uuid='"+data.uuid+"']").remove();
+                    $freedevices.find("[data-uuid='"+data.uuid+"']").remove();
                     var device = tplDevice({'device': data});
                     if (data.free) {
-                        $freedevices.append(device);
+                        $freedevices.find('table tbody').append(device);
                     } else {
-                        $busydevices.append(device);
+                        $busydevices.find('table tbody').append(device);
                     }
+                });
+                socket.on('rename', function (data) {
+                    var device = $("[data-uuid='"+data.uuid+"']");
+                    device.find('input.os').val(data.os);
+                    device.find('input.model').val(data.model);
+                    device.find('span.os').text(data.os);
+                    device.find('span.model').text(data.model);
+                });
+
+                $('table').on('click', 'td.device', function(e) {
+                    e.stopPropagation();
+                    $(this).find('span').hide();
+                    $(this).find('input').show();
+                    $(this).find('input[type=submit]').click(_.bind(function(e) {
+                        e.stopPropagation();
+                        var os = $(this).find('input.os').val();
+                        var model = $(this).find('input.model').val();
+                        var uuid = $(this).parents('tr').data('uuid');
+                        $(this).find('span.os').text(os);
+                        $(this).find('span.model').text(model);
+                        $(this).find('span').show();
+                        $(this).find('input').hide();
+                        $(this).find('input[type=submit]').off('click');
+                        socket.emit('rename', { 'uuid': uuid, 'model': model, 'os': os });
+                    }, this));
                 });
             }
             $(launch);
