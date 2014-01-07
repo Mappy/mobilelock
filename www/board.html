@@ -225,12 +225,14 @@
 
                 $freedevices.find('tbody')
                             .on('mouseover', 'tr', function () {
-                                if ($(this).find('input.os').hasClass('hidden')) {
-                                    $('.delete').removeClass('hidden');
+                                var $row = $(this);
+                                if ($row.find('input.os').hasClass('hidden')) {
+                                    $row.find('.delete').removeClass('hidden');
                                 }
                             })
                             .on('mouseout', 'tr', function () {
-                                $('.delete').addClass('hidden');
+                                var $row = $(this);
+                                $row.find('.delete').addClass('hidden');
                             })
                             .on('click', '.delete', function (e) {
                                 e.stopPropagation();
