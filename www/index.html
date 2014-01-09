@@ -120,7 +120,7 @@
                         'success': function(data, textStatus, xhr) {
                             $('.model').val(data.model).attr('disabled', 'disabled');
                             $('.os').val(data.os).attr('disabled', 'disabled');
-                            $('.sim').attr('checked', device.hasSim);
+                            $('.sim').attr('checked', data.hasSim);
                             if (data.free !== true) {
                                 $('body').removeClass('free').addClass('busy');
                             }
