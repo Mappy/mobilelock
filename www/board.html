@@ -154,6 +154,11 @@
                 $el.find('table tbody').html(fragment);
             };
 
+            var updateCount = function() {
+                $busydevices.find('.count').text($busydevices.find('tr').size()-1);
+                $freedevices.find('.count').text($freedevices.find('tr').size()-1);
+            };
+
             var launch = function() {
                 $.get('/api/devices', function(devices) {
                     populate(devices, false, $busydevices);
@@ -178,6 +183,7 @@
                     } else {
                         $busydevices.find('table tbody').append(device);
                     }
+                    updateCount();
                 });
                 socket.on('rename', function (data) {
                     var device = $("[data-uuid='"+data.uuid+"']");
@@ -188,6 +194,7 @@
                 });
                 socket.on('remove', function (uuid) {
                     $('[data-uuid="' + uuid + '"]').remove();
+                    updateCount();
                 });
 
                 $('table').on('click', 'td.device', function(e) {
