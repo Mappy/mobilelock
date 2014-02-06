@@ -83,7 +83,8 @@ var mobilelock = function (config) {
                                 'model': req.body.model,
                                 'os': req.body.os,
                                 'free': false,
-                                hasSim: req.body.hasSim === 'true'
+                                'hasSim': req.body.hasSim === 'true',
+                                'lastrent': new Date()
                             };
                             devices.add(newDevice);
                             sendToBoards('add', newDevice);
