@@ -230,7 +230,7 @@
                     }, this));
                 });
 
-                $freedevices.find('tbody')
+                $('table').find('tbody')
                             .on('mouseover', 'tr', function () {
                                 var $row = $(this);
                                 if ($row.find('input.os').hasClass('hidden')) {
