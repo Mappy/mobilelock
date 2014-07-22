@@ -1,0 +1,15 @@
+{
+    "apps" : [{
+        "name"        : "mobilelock",
+        "script"      : "./server/launcher.js",
+        "args"        : "['--killSignal=SIGINT']",
+        "error_file" : "/var/log/node/mobilelock-err.log",
+        "out_file"   : "/var/log/node/mobilelock-out.log",
+        "pid_file"   : "./node.pid",
+        "instances": "1",
+        "exec_mode"  : "cluster_mode",
+        "env": {
+            "NODE_ENV": "production"
+        }
+    }]
+}
